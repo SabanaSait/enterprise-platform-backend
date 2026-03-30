@@ -2,15 +2,11 @@
 
 Backend platform service for the Enterprise Admin Platform, designed to be scalable, modular, and frontend-agnostic architecture.
 
----
-
 ## Overview
 
 This service provides a backend API and real-time data capabilities to support client applications.
 
 The system is designed with clear service boundaries and contract-driven APIs, enabling it to evolve into a distributed architecture if needed.
-
----
 
 ## Goals
 
@@ -18,8 +14,6 @@ The system is designed with clear service boundaries and contract-driven APIs, e
 - Enable real-time data updates using WebSockets
 - Maintain a frontend-agnostic architecture
 - Ensure modular and scalable system design
-
----
 
 ## Architecture Principles
 
@@ -35,8 +29,6 @@ The system is designed with clear service boundaries and contract-driven APIs, e
 - **Extensibility**  
   Designed to support future evolution into microservices if required.
 
----
-
 ## Version 1 Scope
 
 The initial version focuses on implementing a **real-time metrics service**.
@@ -46,8 +38,6 @@ The initial version focuses on implementing a **real-time metrics service**.
 - REST endpoint to fetch metrics
 - WebSocket support for live updates
 - Simulated data updates (no database dependency for V1)
-
----
 
 ## API (Planned)
 

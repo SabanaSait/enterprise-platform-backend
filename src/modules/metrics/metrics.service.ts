@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { MetricsResponse } from './types/metrics.types';
+import { MetricsGateway } from './metrics.gateway';
 
 @Injectable()
 export class MetricsService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly gateway: MetricsGateway,
+  ) {}
 
   public getMetrics(): MetricsResponse {
     const users = this.usersService.getAllUsers();
@@ -28,5 +32,14 @@ export class MetricsService {
       generalUsersCount,
       timestamp: new Date().toISOString(),
     };
+  }
+
+  public async updateMetrics() {
+    const metrics = this.getMetrics();
+
+    // real-time push
+    this.gateway.emitMetricsUpdate(metrics);
+
+    return metrics;
   }
 }

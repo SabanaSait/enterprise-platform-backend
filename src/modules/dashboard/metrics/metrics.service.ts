@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { UsersService } from '../../users/users.service';
 import { MetricsResponse } from './types/metrics.types';
 import { MetricsGateway } from './metrics.gateway';
 

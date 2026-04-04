@@ -37,7 +37,7 @@ export class MetricsService {
   public async updateMetrics() {
     const metrics = this.getMetrics();
 
-    // real-time push
+    // real-time updates
     this.gateway.emitMetricsUpdate(metrics);
 
     return metrics;

@@ -4,6 +4,7 @@ import {
   OnGatewayInit,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { MetricsResponse } from './types/metrics.types';
 
 @WebSocketGateway({
   cors: { origin: '*' },
@@ -14,10 +15,10 @@ export class MetricsGateway implements OnGatewayInit {
   server: Server;
 
   afterInit() {
-    console.log('Websocket initialized');
+    console.log('Metrics websocket initialized');
   }
 
-  public emitMetricsUpdate(data: any) {
+  public emitMetricsUpdate(data: MetricsResponse) {
     this.server.emit('metrics:update', data);
   }
 }

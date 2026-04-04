@@ -17,3 +17,9 @@ export interface User extends BaseUser {
 export type CreateUserDto = BaseUser;
 
 export type UpdateUserDto = Partial<CreateUserDto>;
+
+export type UserAction = 'created' | 'updated' | 'deleted';
+export interface UsersWSEvent {
+  action: UserAction;
+  data: User;
+}

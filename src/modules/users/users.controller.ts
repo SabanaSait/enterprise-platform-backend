@@ -6,22 +6,21 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import type { CreateUserDto, UpdateUserDto, User } from './types/user.types';
+import { UsersQueryDto } from './types/users-query.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  public getUsers() {
-    const users = this.usersService.getAllUsers();
+  public getUsers(@Query() query: UsersQueryDto) {
+    const users = this.usersService.getAllUsers(query);
 
-    return {
-      entities: users,
-      total: users.length,
-    };
+    return users;
   }
 
   @Get(':id')

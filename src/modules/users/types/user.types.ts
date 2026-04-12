@@ -23,3 +23,25 @@ export interface UsersWSEvent {
   action: UserAction;
   data: User;
 }
+
+// Pagination + Sorting
+export type UserSortKey = keyof BaseUser;
+
+export type SortDirection = 'asc' | 'desc';
+
+export interface UsersQuery {
+  pageNumber?: number;
+  pageSize?: number;
+  sortBy?: UserSortKey;
+  sortDirection?: SortDirection;
+  search?: string;
+}
+
+export interface PaginatedResponse<T> {
+  entities: T[];
+  total: number;
+  pageNumber: number;
+  pageSize: number;
+  sortBy: string;
+  sortDirection: SortDirection;
+}

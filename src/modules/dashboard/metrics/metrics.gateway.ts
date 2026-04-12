@@ -12,7 +12,7 @@ import { MetricsResponse } from './types/metrics.types';
 })
 export class MetricsGateway implements OnGatewayInit {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   afterInit() {
     console.log('Metrics websocket initialized');

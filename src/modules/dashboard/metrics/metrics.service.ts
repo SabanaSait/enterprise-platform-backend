@@ -11,20 +11,21 @@ export class MetricsService {
   ) {}
 
   public getMetrics(): MetricsResponse {
-    const users = this.usersService.getAllUsers();
+    const { entities, total } = this.usersService.getAllUsers();
 
-    const totalUsers = users.length;
-    const activeUsers = users.filter((u) => u.status === 'Active').length;
-    const inactiveUsers = users.filter((u) => u.status === 'Inactive').length;
+    const activeUsers = entities.filter((u) => u.status === 'Active').length;
+    const inactiveUsers = entities.filter(
+      (u) => u.status === 'Inactive',
+    ).length;
 
-    const adminUsersCount = users.filter((u) => u.role === 'ADMIN').length;
-    const supervisorsCount = users.filter(
+    const adminUsersCount = entities.filter((u) => u.role === 'ADMIN').length;
+    const supervisorsCount = entities.filter(
       (u) => u.role === 'SUPERVISOR',
     ).length;
-    const generalUsersCount = users.filter((u) => u.role === 'USER').length;
+    const generalUsersCount = entities.filter((u) => u.role === 'USER').length;
 
     return {
-      totalUsers,
+      totalUsers: total,
       activeUsers,
       inactiveUsers,
       adminUsersCount,

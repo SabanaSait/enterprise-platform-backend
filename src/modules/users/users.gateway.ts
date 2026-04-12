@@ -12,7 +12,7 @@ import { UsersWSEvent } from './types/user.types';
 })
 export class UsersGateway implements OnGatewayInit {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   afterInit() {
     console.log('Users websocket initialized');

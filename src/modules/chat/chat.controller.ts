@@ -1,25 +1,38 @@
-import { Controller, Post, Body, Res } from '@nestjs/common';
-import type { Response } from 'express';
-import { LLMService } from 'src/llm/llm.service';
+import { Controller, Post, Body, Res, Req } from '@nestjs/common';
+import type { Response, Request } from 'express';
+import { ChatService } from './chat.service';
 
 @Controller('chat')
 export class ChatController {
-  constructor(private readonly llmService: LLMService) {}
+  constructor(private readonly chatService: ChatService) {}
 
   @Post('stream')
-  async streamChat(@Body('message') message: string, @Res() res: Response) {
+  async streamChat(
+    @Body('message') message: string,
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Transfer-Encoding', 'chunked');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    const stream = this.llmService.stream(message);
+    req.on('close', () => {
+      console.log('Client disconnected');
+    });
 
-    // Stream character by character
-    for await (const chunk of stream) {
-      res.write(chunk);
+    try {
+      const stream = await this.chatService.streamResponse(message);
+
+      for await (const chunk of stream) {
+        res.write(chunk);
+      }
+
+      res.end();
+    } catch (error) {
+      console.error('[ChatController] Streaming error:', error);
+
+      res.status(500).end('Error generating response');
     }
-
-    res.end();
   }
 }

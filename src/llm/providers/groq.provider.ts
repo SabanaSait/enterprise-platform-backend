@@ -1,6 +1,7 @@
 import { ConfigService } from '@nestjs/config';
-import { LLMProvider } from '../interfaces/llm-provider.interface';
 import { Injectable } from '@nestjs/common';
+import { LLMProvider } from '../interfaces/llm-provider.interface';
+import { SYSTEM_PROMPT } from '../prompts/system.prompt';
 
 @Injectable()
 export class GroqProvider implements LLMProvider {
@@ -17,7 +18,10 @@ export class GroqProvider implements LLMProvider {
       },
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',
-        messages: [{ role: 'user', content: message }],
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: message },
+        ],
         stream: true,
       }),
     });

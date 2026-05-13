@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { LLMProvider } from '../interfaces/llm-provider.interface';
+import { SYSTEM_PROMPT } from '../prompts/system.prompt';
 
 @Injectable()
 export class OpenAIProvider implements LLMProvider {
@@ -18,7 +19,10 @@ export class OpenAIProvider implements LLMProvider {
   async *stream(message: string): AsyncIterable<string> {
     const stream = await this.client.chat.completions.create({
       model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: message }],
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: message },
+      ],
       stream: true,
     });
 

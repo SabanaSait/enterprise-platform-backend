@@ -16,6 +16,7 @@ export class ContextBuilder {
       - Admin: ${metrics.adminUsersCount}
       - Supervisor: ${metrics.supervisorsCount}
       - User: ${metrics.generalUsersCount}
+      - Timestamp: ${metrics.timestamp}
       `;
 
     return `${context} 

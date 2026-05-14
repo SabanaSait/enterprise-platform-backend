@@ -1,3 +1,5 @@
+import { Message } from './message.interface';
+
 export interface LLMProvider {
-  stream(message: string): AsyncIterable<string>;
+  stream(message: Message[]): AsyncIterable<string>;
 }

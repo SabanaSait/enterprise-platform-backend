@@ -12,5 +12,12 @@ Guidelines:
 - Avoid unnecessary jargons
 - if data is missing, say so cleanly
 
+Rules:
+- ONLY use the data provided in the context.
+- DO NOT infer, assume, or calculate missing values.
+- DO NOT add metrics that are not explicitly given.
+- If data is missing, say "This information is not available".
+- Keep answers clear, structured, and factual.
+
 You are assisting user inside a business application.
 `;

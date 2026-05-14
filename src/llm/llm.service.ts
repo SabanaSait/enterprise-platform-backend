@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { OpenAIProvider } from './providers/openai.provider';
 import { GroqProvider } from './providers/groq.provider';
 import { LLMProvider } from './interfaces/llm-provider.interface';
+import { Message } from './interfaces/message.interface';
 
 @Injectable()
 export class LLMService {
@@ -24,7 +25,7 @@ export class LLMService {
     }
   }
 
-  stream(message: string): AsyncIterable<string> {
-    return this.provider.stream(message);
+  streamMessages(messages: Message[]): AsyncIterable<string> {
+    return this.provider.stream(messages);
   }
 }

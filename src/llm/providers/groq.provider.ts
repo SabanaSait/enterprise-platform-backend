@@ -1,13 +1,13 @@
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { LLMProvider } from '../interfaces/llm-provider.interface';
-import { SYSTEM_PROMPT } from '../prompts/system.prompt';
+import { Message } from '../interfaces/message.interface';
 
 @Injectable()
 export class GroqProvider implements LLMProvider {
   constructor(private readonly configService: ConfigService) {}
 
-  async *stream(message: string): AsyncIterable<string> {
+  async *stream(messages: Message[]): AsyncIterable<string> {
     const apiKey = this.configService.get<string>('GROQ_API_KEY');
 
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -18,10 +18,7 @@ export class GroqProvider implements LLMProvider {
       },
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: message },
-        ],
+        messages,
         stream: true,
       }),
     });

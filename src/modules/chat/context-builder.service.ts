@@ -9,7 +9,7 @@ export class ContextBuilder {
     const metrics = this.metricsService.getMetrics();
 
     const context = `
-      ### Dashboard metrics:
+      ### Dashboard metrics (ONLY use these):
       - Total users: ${metrics.totalUsers}
       - Active users: ${metrics.activeUsers}
       - Inactive users: ${metrics.inactiveUsers}

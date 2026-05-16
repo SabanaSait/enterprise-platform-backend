@@ -23,7 +23,7 @@ export class ChatService {
 
   async streamResponse(
     message: string,
-    mode: string,
+    mode?: string,
   ): Promise<AsyncIterable<string>> {
     this.history.push({ role: 'user', content: message });
 

@@ -4,113 +4,118 @@ Backend platform service for the Enterprise Admin Platform, designed with a scal
 
 ## Overview
 
-This service provides backend APIs and real-time data capabilities to support multiple client applications.
+This service provides backend APIs, real-time data capabilities, and an AI-powered copilot layer to support modern enterprise applications.
 
 The system is designed with clear service boundaries and contract-driven APIs, enabling it to evolve into a distributed architecture if needed.
 
-The backend is intentionally **frontend-agnostic**, allowing reuse across different types of client applications such as administrative dashboards and interactive applications.
+The backend is intentionally **frontend-agnostic**, allowing reuse across different client applications such as administrative dashboards and AI-driven interfaces.
+
+## Key Highlights
+
+- RESTful APIs for enterprise data management
+- Real-time updates using WebSockets
+- AI Copilot with **LLM-powered tool calling**
+- Modular, scalable architecture
+
+## Tech Stack
+
+- Node.js (v20.20.2)
+- TypeScript (v5.9.3)
+- NestJS (v11.0.16)
 
 ## Goals
 
-- Provide RESTful APIs for client applications
-- Enable real-time data updates using WebSockets
-- Maintain a frontend-agnostic architecture
-- Ensure modular and scalable system design
-- Support future system evolution
+- Provide reliable backend APIs for client applications
+- Enable real-time, event-driven data updates
+- Integrate AI capabilities using a tool-based architecture
+- Maintain a clean, modular, and scalable system design
+- Support future evolution into distributed systems
 
 ## Architecture Principles
 
 - **Contract-Driven Design**  
-  APIs and event contracts are defined independently of any specific frontend implementation.
+  APIs and event contracts are defined independently of any specific frontend.
 
 - **Frontend-Agnostic Models**  
   Data structures are based on domain concepts, not UI requirements.
 
 - **Modular Architecture**  
-  The system is organized into domain-based modules to support scalability and maintainability.
+  Organized into domain-based modules for scalability and maintainability.
 
 - **Extensibility**  
-  Designed to support future evolution into distributed or microservice-based architectures if required.
+  Designed to evolve into microservices or distributed systems.
 
-## Version 1 Scope ( Current Implementation)
+## AI Copilot
 
-The current version focuses on foundational user management and real-time metrics capabilities using simulated data.
+The backend includes an AI Copilot layer that enables natural language interaction with system data using LLM-powered tool execution.
 
-### Implemented Modules
+### Features
 
-#### Users Module
+- LLM-powered query handling
+- Intelligent tool selection layer
+- Structured tool execution (e.g., metrics fetching)
+- Streaming responses for real-time UX
+- Context-aware conversation handling
 
-Provides core user management functionality.
+### Architecture
 
-**Features:**
+User Query  
+↓  
+LLM (Tool Decision)  
+↓  
+Tool Registry  
+↓  
+Backend Services (Metrics, Users)  
+↓  
+LLM (Response Generation)  
+↓  
+Streaming Response to Client
 
-- Create, update, and delete users
-- Fetch users with:
-  - Backend-driven pagination
-  - Sorting support
-  - Search filtering
-- Optional pagination support (used internally for metrics calculations)
-- Real-time user update notifications via WebSockets
-- In-memory mock data store (no database dependency in V1)
+### Example Use Cases
 
-#### Metrics Module
+- "Show me dashboard metrics"
+- "How many active users are there?"
+- "Which user group is largest?"
 
-Provides derived metrics based on user data.
+## Version 1 Scope (Current Implementation)
 
-**Features:**
+The current version focuses on:
 
-- REST endpoint to fetch metrics
-- WebSocket support for live metric updates
-- Test endpoint to simulate metric update events
-- Integration with Users module data
+- User management (with pagination, sorting, and filtering)
+- Real-time metrics
+- AI-assisted querying
+- Simulated data layer (in-memory)
 
 ## Real-Time Capabilities
 
-The backend supports WebSocket-based communication to notify connected clients about data changes.
+Supports WebSocket-based communication for live updates.
 
-Typical use cases include:
+### Use Cases
 
-- Updating dashboards when users are created, updated, or deleted
-- Triggering live metric updates
-- Keeping UI data synchronized without polling
-
-## Pagination Support
-
-The Users API supports backend-driven pagination.
-
-Example Request:
-
-GET /users?pageNumber=1&pageSize=10
-
-Example Response:
-
-```json
-{
-  "entities": [...],
-  "total": 50,
-  "pageNumber": 1,
-  "pageSize": 10
-}
-```
-
-Pagination is optional and can be bypassed internally when full datasets are required (for example, during metrics computation).
+- Live dashboard updates
+- Event-driven UI refresh
+- Eliminates polling
 
 ## Data Layer (V1)
 
-The current version uses an **in-memory mock data store** to simulate persistent storage.
+Uses an **in-memory mock data store**.
 
-This approach enables:
+### Benefits
 
-- Faster development cycles
+- Fast development
+- No database setup required
 - Predictable test data
-- Independent backend development without database setup
-- Future database replacement without API redesign
+- Easy future replacement
 
-### Planned Enhancements
+## Future Enhancements
 
-- Database integration (PostgreSQL or equivalent)
-- ORM-based persistence layer
-- Data migration support
+- Database integration (PostgreSQL)
+- Authentication and authorization
+- Role-based access control (RBAC)
+- Advanced metrics computation
+- Observability (logging and monitoring)
+- Persistent memory for AI Copilot
+- Multi-tool orchestration
 
 ## Running the Project
 
@@ -126,24 +131,21 @@ Start the development server:
 npm run start:dev
 ```
 
-## Future Enhancements
-
-Planned improvements include:
-
-- Database integration
-- Authentication and authorization
-- Role-based access control
-- Advanced metrics computation
-- Performance optimization
-- Logging and monitoring support
-
 ## Design Philosophy
 
-This backend is built as a **reusable service platform**, not a single-application backend.
+This backend is built as a **reusable platform service**, not a single-application backend.
 
-### Key Design Intentions
+### Core Intentions
 
-- Maintain clean domain boundaries
+- Maintain strong domain boundaries
 - Support multiple client applications
-- Preserve backward compatibility
-- Enable incremental architectural evolution
+- Ensure backward compatibility
+- Enable incremental evolution
+- Integrate AI as a first-class capability
+
+## Why This Project Stands Out
+
+- Combines traditional backend architecture with modern AI patterns
+- Implements **LLM-based tool calling (agent-like behavior)**
+- Supports real-time + streaming user experiences
+- Maintains clean separation (LLM ↔ Tools ↔ Services)

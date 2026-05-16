@@ -1,8 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { LLMService } from 'src/llm/llm.service';
-import { ContextBuilder } from './context-builder.service';
 import { Message } from 'src/llm/interfaces/message.interface';
-import { SYSTEM_PROMPT } from 'src/llm/prompts/system.prompt';
+import {
+  SYSTEM_PROMPT_GENERIC,
+  SYSTEM_PROMPT_TOOL,
+  SYSTEM_PROMPT_INTERPRET_TOOL_RESULT,
+} from 'src/llm/prompts/system.prompt';
+import { ToolRegistry } from 'src/llm/tools/tool.registry';
+import { buildToolDecisionPrompt } from './prompts/tool-decision.prompt';
+import { ToolDecision } from './prompts/tool-decision.type';
+import { parseDecision } from './prompts/tool-decision.parser';
 
 @Injectable()
 export class ChatService {
@@ -11,18 +18,25 @@ export class ChatService {
 
   constructor(
     private readonly llmService: LLMService,
-    private readonly contextBuilder: ContextBuilder,
+    private readonly toolRegistry: ToolRegistry,
   ) {}
 
-  async streamResponse(message: string): Promise<AsyncIterable<string>> {
+  async streamResponse(
+    message: string,
+    mode: string,
+  ): Promise<AsyncIterable<string>> {
     this.history.push({ role: 'user', content: message });
 
-    const enrichedPrompt = await this.contextBuilder.build(message);
-
     const messages: Message[] = [
-      { role: 'system', content: SYSTEM_PROMPT },
+      {
+        role: 'system',
+        content:
+          mode === 'tool'
+            ? SYSTEM_PROMPT_INTERPRET_TOOL_RESULT
+            : SYSTEM_PROMPT_GENERIC,
+      },
       ...this.history.slice(-5, -1),
-      { role: 'user', content: enrichedPrompt },
+      { role: 'user', content: message },
     ];
 
     const stream = this.llmService.streamMessages(messages);
@@ -42,5 +56,62 @@ export class ChatService {
     }.bind(this);
 
     return streamWithCapture();
+  }
+
+  async decideTool(userMessage: string) {
+    const tools = this.toolRegistry.getAllTools();
+
+    const prompt = buildToolDecisionPrompt(
+      userMessage,
+      tools.map((t) => ({
+        name: t.name,
+        description: t.description,
+      })),
+    );
+
+    const response = await this.llmService.generate([
+      {
+        role: 'system',
+        content: SYSTEM_PROMPT_TOOL,
+      },
+      {
+        role: 'user',
+        content: prompt,
+      },
+    ]);
+
+    try {
+      const parsed = parseDecision(response);
+
+      return parsed as ToolDecision;
+    } catch (error) {
+      console.error('Failed to parse LLM decision:', response);
+      return { tool: null, arguments: {} };
+    }
+  }
+
+  async handleMessage(message: string) {
+    const rawDecision = await this.decideTool(message);
+    const decision = parseDecision(rawDecision);
+
+    // Decide tool
+    if (decision.tool) {
+      const tool = this.toolRegistry.getTool(decision.tool);
+
+      if (!tool) {
+        return `Unknown tool: ${decision.tool}`;
+      }
+
+      const toolResult = await tool.execute(decision.args);
+      const finalMessage = `
+        User question: ${message}
+        Tool result: ${JSON.stringify(toolResult)}
+      `;
+
+      return this.streamResponse(finalMessage, 'tool');
+    }
+
+    // Fallback to stream
+    return this.streamResponse(message);
   }
 }

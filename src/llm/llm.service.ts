@@ -28,4 +28,8 @@ export class LLMService {
   streamMessages(messages: Message[]): AsyncIterable<string> {
     return this.provider.stream(messages);
   }
+
+  async generate(messages: Message[]): Promise<string> {
+    return this.provider.generate(messages);
+  }
 }

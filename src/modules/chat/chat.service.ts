@@ -10,6 +10,8 @@ import { ToolRegistry } from 'src/llm/tools/tool.registry';
 import { buildToolDecisionPrompt } from './prompts/tool-decision.prompt';
 import { ToolDecision } from './prompts/tool-decision.type';
 import { parseDecision } from './prompts/tool-decision.parser';
+import { formatContext } from './context/format-context';
+import { CopilotContext } from './context/context.types';
 
 @Injectable()
 export class ChatService {
@@ -21,19 +23,31 @@ export class ChatService {
     private readonly toolRegistry: ToolRegistry,
   ) {}
 
+  private buildSystemPrompt(
+    basePrompt: string,
+    context?: CopilotContext,
+  ): string {
+    return `${basePrompt}\n${formatContext(context)}`;
+  }
+
   async streamResponse(
     message: string,
+    context?: CopilotContext,
     mode?: string,
   ): Promise<AsyncIterable<string>> {
     this.history.push({ role: 'user', content: message });
 
+    const basePrompt =
+      mode === 'tool'
+        ? SYSTEM_PROMPT_INTERPRET_TOOL_RESULT
+        : SYSTEM_PROMPT_GENERIC;
+
+    const systemPrompt = this.buildSystemPrompt(basePrompt, context);
+
     const messages: Message[] = [
       {
         role: 'system',
-        content:
-          mode === 'tool'
-            ? SYSTEM_PROMPT_INTERPRET_TOOL_RESULT
-            : SYSTEM_PROMPT_GENERIC,
+        content: systemPrompt,
       },
       ...this.history.slice(-5, -1),
       { role: 'user', content: message },
@@ -58,7 +72,7 @@ export class ChatService {
     return streamWithCapture();
   }
 
-  async decideTool(userMessage: string) {
+  async decideTool(userMessage: string, context?: CopilotContext) {
     const tools = this.toolRegistry.getAllTools();
 
     const prompt = buildToolDecisionPrompt(
@@ -67,12 +81,13 @@ export class ChatService {
         name: t.name,
         description: t.description,
       })),
+      context,
     );
 
     const response = await this.llmService.generate([
       {
         role: 'system',
-        content: SYSTEM_PROMPT_TOOL,
+        content: this.buildSystemPrompt(SYSTEM_PROMPT_TOOL, context),
       },
       {
         role: 'user',
@@ -86,14 +101,12 @@ export class ChatService {
       return parsed as ToolDecision;
     } catch (error) {
       console.error('Failed to parse LLM decision:', response);
-      return { tool: null, arguments: {} };
+      return { tool: null, args: {} };
     }
   }
 
-  async handleMessage(message: string) {
-    const rawDecision = await this.decideTool(message);
-    const decision = parseDecision(rawDecision);
-
+  async handleMessage(message: string, context?: CopilotContext) {
+    const decision = await this.decideTool(message, context);
     // Decide tool
     if (decision.tool) {
       const tool = this.toolRegistry.getTool(decision.tool);
@@ -108,10 +121,10 @@ export class ChatService {
         Tool result: ${JSON.stringify(toolResult)}
       `;
 
-      return this.streamResponse(finalMessage, 'tool');
+      return this.streamResponse(finalMessage, context, 'tool');
     }
 
     // Fallback to stream
-    return this.streamResponse(message);
+    return this.streamResponse(message, context);
   }
 }

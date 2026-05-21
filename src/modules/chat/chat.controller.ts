@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Res, Req } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { ChatService } from './chat.service';
+import { CopilotContext } from './context/context.types';
 
 @Controller('chat')
 export class ChatController {
@@ -8,10 +9,11 @@ export class ChatController {
 
   @Post('stream')
   async streamChat(
-    @Body('message') message: string,
+    @Body() body: { message: string; context?: CopilotContext },
     @Res() res: Response,
     @Req() req: Request,
   ) {
+    const { message, context } = body;
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Transfer-Encoding', 'chunked');
     res.setHeader('Cache-Control', 'no-cache');
@@ -22,7 +24,7 @@ export class ChatController {
     });
 
     try {
-      const result = await this.chatService.handleMessage(message);
+      const result = await this.chatService.handleMessage(message, context);
 
       if (this.isAsyncIterable(result)) {
         for await (const chunk of result) {
